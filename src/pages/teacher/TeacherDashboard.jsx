@@ -37,9 +37,8 @@ export default function TeacherDashboard() {
       // Get active published timetable
       const { data: tt } = await supabase
         .from('timetables')
-        .select('*, academic_period:academic_periods!inner(name, is_active)')
+        .select('*')
         .eq('status', 'published')
-        .eq('academic_period.is_active', true)
         .limit(1)
         .single()
 

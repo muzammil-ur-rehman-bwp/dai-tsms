@@ -72,7 +72,18 @@ function EntityRouter() {
 function RoleRedirect() {
   const { session, role, loading } = useAuth()
 
-  if (loading) return null
+  console.log('[RoleRedirect] Render:', { loading, session: !!session, role })
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          <span className="text-sm text-gray-500">Loading…</span>
+        </div>
+      </div>
+    )
+  }
 
   if (!session) return <Navigate to="/login" replace />
 
@@ -152,6 +163,7 @@ function AppRoutes() {
 }
 
 export default function App() {
+  console.log('[App] Rendering')
   return (
     <BrowserRouter>
       <AuthProvider>

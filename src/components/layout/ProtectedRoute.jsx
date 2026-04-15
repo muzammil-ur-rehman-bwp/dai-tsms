@@ -19,7 +19,10 @@ export default function ProtectedRoute({ requiredRole, children }) {
   const { session, role, firstLoginPending, isActive, loading, signOut } = useAuth()
   const location = useLocation()
 
+  console.log('[ProtectedRoute] Render:', { loading, session: !!session, role, firstLoginPending, isActive, path: location.pathname })
+
   if (loading) {
+    console.log('[ProtectedRoute] Showing loading spinner')
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="flex flex-col items-center gap-3">

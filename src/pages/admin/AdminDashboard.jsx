@@ -41,13 +41,16 @@ export default function AdminDashboard() {
       setStats(s)
 
       // Active timetable
-      const { data: tt } = await supabase
-        .from('timetables')
-        .select('name, status, academic_period:academic_periods(name)')
-        .in('status', ['draft', 'published'])
-        .limit(1)
-        .single()
-      setActiveTimetable(tt ?? null)
+      try {
+        const { data: tt } = await supabase
+          .from('timetables')
+          .select('id, name, status, academic_period_id')
+          .limit(1)
+        setActiveTimetable(tt && tt.length > 0 ? tt[0] : null)
+      } catch (err) {
+        console.error('[AdminDashboard] Error fetching timetable:', err)
+        setActiveTimetable(null)
+      }
 
       // Pending swap requests
       const { count: swapCount } = await supabase

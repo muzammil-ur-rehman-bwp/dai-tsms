@@ -26,7 +26,7 @@ export function TimetableProvider({ timetableId, children }) {
     const [ttRes, slotsRes, assignRes] = await Promise.all([
       supabase
         .from('timetables')
-        .select('*, academic_period:academic_periods(name)')
+        .select('*')
         .eq('id', timetableId)
         .single(),
       supabase

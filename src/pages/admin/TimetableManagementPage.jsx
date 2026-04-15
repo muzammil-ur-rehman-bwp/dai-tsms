@@ -333,7 +333,7 @@ export default function TimetableManagementPage() {
   async function fetchTimetables() {
     const { data, error: err } = await supabase
       .from('timetables')
-      .select('id, name, status, academic_period:academic_periods(name)')
+      .select('id, name, status, academic_period_id')
       .order('created_at', { ascending: false })
     if (err) setError(err.message)
     else setTimetables(data ?? [])
