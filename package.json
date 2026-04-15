@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "test": "vitest --run",
     "test:watch": "vitest",
-    "seed": "node seed/seedRunner.js"
+    "seed": "node seed/seedRunner.js",
+    "create-admin": "node seed/createAdmin.js"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.4",
