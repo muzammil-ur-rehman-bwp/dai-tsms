@@ -72,14 +72,18 @@ export default function LoginPage() {
       }
     }
 
-    setLoading(false)
-
-    // Redirect based on first_login_pending or role
-    if (profile.first_login_pending) {
-      navigate('/change-password', { replace: true })
-    } else {
-      navigate(`/${profile.role}`, { replace: true })
-    }
+    // Wait a tick for AuthContext to update, then redirect
+    // This ensures the session state is properly set before navigation
+    setTimeout(() => {
+      setLoading(false)
+      
+      // Redirect based on first_login_pending or role
+      if (profile.first_login_pending) {
+        navigate('/change-password', { replace: true })
+      } else {
+        navigate(`/${profile.role}`, { replace: true })
+      }
+    }, 100)
   }
 
   return (
