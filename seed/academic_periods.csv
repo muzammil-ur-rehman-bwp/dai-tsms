@@ -1,0 +1,5 @@
+name,acadmic year,academic semester,is_active
+2026 SPRING,2026,SPRING,true
+2026 FALL,2026,FALL,false
+2027 SPRING,2027,SPRING,false
+2027 FALL,2027,FALL,false
