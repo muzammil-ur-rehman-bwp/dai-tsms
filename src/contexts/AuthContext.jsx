@@ -121,7 +121,9 @@ export function AuthProvider({ children }) {
     profile,
     role: profile?.role,
     firstLoginPending: profile?.first_login_pending,
-    isActive: profile?.is_active,
+    // For admin users, always set isActive to true (they don't have a teacher/student record)
+    // For teacher/student, isActive comes from their role-specific table (checked in LoginPage)
+    isActive: profile?.role === 'admin' ? true : profile?.is_active !== false,
     loading,
     signIn,
     signOut,
