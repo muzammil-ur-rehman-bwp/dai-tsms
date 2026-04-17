@@ -7,45 +7,49 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        display: ['"Playfair Display"', 'serif'],
+        body:    ['"DM Sans"', 'sans-serif'],
+        mono:    ['"JetBrains Mono"', 'monospace'],
       },
       colors: {
-        primary: {
-          DEFAULT: '#1E40AF',
-          50: '#EFF6FF',
-          100: '#DBEAFE',
-          500: '#3B82F6',
-          600: '#2563EB',
-          700: '#1D4ED8',
-          800: '#1E40AF',
-          900: '#1E3A8A',
-        },
-        secondary: {
-          DEFAULT: '#7C3AED',
-          500: '#8B5CF6',
-          600: '#7C3AED',
-          700: '#6D28D9',
-        },
-        accent: {
-          DEFAULT: '#059669',
-          500: '#10B981',
-          600: '#059669',
-          700: '#047857',
-        },
-        warning: {
-          DEFAULT: '#D97706',
-          500: '#F59E0B',
-          600: '#D97706',
-          700: '#B45309',
-        },
-        danger: {
-          DEFAULT: '#DC2626',
-          500: '#EF4444',
-          600: '#DC2626',
-          700: '#B91C1C',
+        primary:   { DEFAULT: '#1a56db', light: '#3b82f6', dark: '#1e3a8a' },
+        secondary: { DEFAULT: '#7c3aed', light: '#a78bfa', dark: '#4c1d95' },
+        accent:    { DEFAULT: '#f59e0b', light: '#fcd34d', dark: '#b45309' },
+        success:   { DEFAULT: '#10b981', light: '#6ee7b7', dark: '#065f46' },
+        danger:    { DEFAULT: '#ef4444', light: '#fca5a5', dark: '#991b1b' },
+        surface:   { DEFAULT: '#f8fafc', card: '#ffffff', border: '#e2e8f0' },
+        ink:       { DEFAULT: '#0f172a', muted: '#64748b', faint: '#cbd5e1' },
+      },
+      boxShadow: {
+        card: '0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.06)',
+        lift: '0 4px 24px rgba(0,0,0,.12)',
+        glow: '0 0 0 3px rgba(26,86,219,.25)',
+      },
+      borderRadius: { xl2: '1rem', xl3: '1.5rem' },
+      screens: {
+        xs: '375px',
+      },
+      animation: {
+        fadeUp: 'fadeUp 0.3s ease-out',
+      },
+      keyframes: {
+        fadeUp: {
+          'from': { opacity: '0', transform: 'translateY(10px)' },
+          'to': { opacity: '1', transform: 'translateY(0)' },
         },
       },
     },
   },
-  plugins: [],
+  plugins: [
+    // scrollbar-hide utility
+    function({ addUtilities }) {
+      addUtilities({
+        '.scrollbar-none': {
+          '-ms-overflow-style': 'none',
+          'scrollbar-width': 'none',
+          '&::-webkit-scrollbar': { display: 'none' },
+        },
+      })
+    },
+  ],
 }

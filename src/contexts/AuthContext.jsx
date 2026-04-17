@@ -1,83 +1,121 @@
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useState, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 
 const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
-  const [session, setSession] = useState(null)
   const [user, setUser] = useState(null)
-  const [role, setRole] = useState(null)
-  const [firstLoginPending, setFirstLoginPending] = useState(false)
-  const [isActive, setIsActive] = useState(true)
+  const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(true)
+  const initialised = useRef(false)
 
-  async function fetchUserProfile(authUser) {
+  async function loadProfile(authUser) {
     if (!authUser) {
-      console.log('[AuthContext] No auth user, clearing profile')
       setUser(null)
-      setRole(null)
-      setFirstLoginPending(false)
-      setIsActive(true)
+      setProfile(null)
+      setLoading(false)
       return
     }
 
-    console.log('[AuthContext] Auth user detected:', authUser.email)
-    setUser(authUser)
+    try {
+      // Wrap profile fetch in Promise.race with 5s timeout
+      const profilePromise = supabase
+        .from('user_profiles')
+        .select('*')
+        .eq('id', authUser.id)
+        .single()
 
-    // TEMPORARY WORKAROUND: Profile fetch is timing out due to Supabase connection issue
-    // The query hangs indefinitely when trying to SELECT from profiles table
-    // This appears to be a Supabase RLS or connection pooling issue
-    // For now, we assume admin role for all authenticated users
-    // TODO: Investigate and fix the profile fetch timeout issue
-    console.log('[AuthContext] Assuming admin role (profile fetch disabled due to timeout issue)')
-    setRole('admin')
-    setFirstLoginPending(false)
-    setIsActive(true)
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Profile fetch timeout')), 5000)
+      )
+
+      const { data, error } = await Promise.race([profilePromise, timeoutPromise])
+
+      if (error) throw error
+      setUser(authUser)
+      setProfile(data)
+    } catch (err) {
+      console.error('loadProfile error:', err.message)
+      // Continue with authenticated user even if profile fails
+      setUser(authUser)
+      setProfile(null)
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => {
-    // Get initial session
-    console.log('[AuthContext] Initializing auth...')
-    supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
-      console.log('[AuthContext] Initial session:', initialSession?.user?.email ?? 'none')
-      setSession(initialSession)
-      fetchUserProfile(initialSession?.user ?? null).finally(() => {
-        console.log('[AuthContext] Auth initialization complete')
-        setLoading(false)
-      })
-    }).catch(err => {
-      console.error('[AuthContext] Error getting session:', err)
-      setLoading(false)
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      initialised.current = true
+      loadProfile(session?.user ?? null)
     })
 
-    // Listen for auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, newSession) => {
-        console.log('[AuthContext] Auth state changed:', _event, newSession?.user?.email ?? 'none')
-        setSession(newSession)
-        setLoading(true)
-        await fetchUserProfile(newSession?.user ?? null)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!initialised.current) return
+      if (event === 'SIGNED_OUT') {
+        setUser(null)
+        setProfile(null)
         setLoading(false)
+        return
       }
-    )
+      // Skip USER_UPDATED — completePasswordChange handles state directly
+      if (event === 'USER_UPDATED') return
+      loadProfile(session?.user ?? null)
+    })
 
     return () => subscription.unsubscribe()
   }, [])
+
+  async function signIn(email, password) {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+    if (error) throw error
+    return data
+  }
 
   async function signOut() {
     await supabase.auth.signOut()
   }
 
-  const value = {
-    session,
-    user,
-    role,
-    firstLoginPending,
-    isActive,
-    loading,
-    signOut,
-    setFirstLoginPending,
+  async function refreshProfile() {
+    if (!user) return
+    const { data } = await supabase
+      .from('user_profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single()
+    setProfile(data)
   }
+
+  async function completePasswordChange(newPassword) {
+    // Step 1 — update auth password
+    const { error: authErr } = await supabase.auth.updateUser({ password: newPassword })
+    if (authErr) throw authErr
+
+    // Step 2 — get current user id
+    const { data: { user: currentUser } } = await supabase.auth.getUser()
+
+    // Step 3 — update DB flag (plain update, no .select() to avoid RLS PGRST116)
+    const { error: dbErr } = await supabase
+      .from('user_profiles')
+      .update({ must_change_password: false, updated_at: new Date().toISOString() })
+      .eq('id', currentUser.id)
+    if (dbErr) throw dbErr
+
+    // Step 4 — fetch the fresh profile in a separate SELECT (RLS allows own row read)
+    const { data: updatedProfile, error: fetchErr } = await supabase
+      .from('user_profiles')
+      .select('*')
+      .eq('id', currentUser.id)
+      .single()
+    if (fetchErr) throw fetchErr
+
+    // Step 5 — patch in-memory state directly so navigate() sees the new value instantly
+    setProfile(updatedProfile)
+
+    return updatedProfile
+  }
+
+  const value = { user, profile, loading, signIn, signOut, refreshProfile, completePasswordChange }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
