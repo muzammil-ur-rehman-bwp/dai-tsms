@@ -1,11 +1,14 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import { Eye, EyeOff } from 'lucide-react'
+import { Footer } from '../../components/layout/Footer'
 
 export default function LoginPage() {
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
 
@@ -98,74 +101,79 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
-        <div className="bg-white rounded-2xl shadow-lg p-8">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-primary-100 mb-4">
-              <svg className="w-7 h-7 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                  d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-              </svg>
-            </div>
-            <h1 className="text-2xl font-bold text-gray-900">DAI-TSMS</h1>
-            <p className="text-sm text-gray-500 mt-1">Department of Artificial Intelligence</p>
+    <div className="min-h-screen bg-gradient-to-br from-primary-dark via-primary to-secondary-dark flex flex-col items-center justify-center p-4">
+      {/* Background texture */}
+      <div className="absolute inset-0 opacity-5"
+           style={{ backgroundImage: 'radial-gradient(circle at 25% 25%, white 1px, transparent 1px), radial-gradient(circle at 75% 75%, white 1px, transparent 1px)', backgroundSize: '48px 48px' }} />
+
+      <div className="relative z-10 w-full max-w-md flex-1 flex flex-col items-center justify-center">
+        {/* Logo */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center mb-4">
+            <img src="/dai-logo.png" alt="DAI Logo" className="w-20 h-20 rounded-2xl object-cover" />
           </div>
+          <h1 className="font-display text-4xl font-bold text-white mb-1">DAI-TSMS</h1>
+          <p className="text-white/60 text-sm">Department of Artificial Intelligence - Timetable Scheduling & Management System</p>
+        </div>
 
-          {/* Error banner */}
-          {error && (
-            <div className="mb-4 p-3 rounded-lg bg-danger-50 border border-danger-200 text-danger text-sm" role="alert">
-              {error}
-            </div>
-          )}
+        {/* Card */}
+        <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl3 p-5 sm:p-8 shadow-lift w-full">
+          <h2 className="font-display text-2xl text-white mb-6">Sign In</h2>
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                Email address
-              </label>
+              <label className="form-label text-white/80">Email Address</label>
               <input
-                id="email"
+                className="form-input bg-white/10 border-white/20 text-white placeholder-white/30 focus:border-white/60"
                 type="email"
-                autoComplete="email"
-                required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                 placeholder="you@example.com"
-                aria-label="Email address"
+                required
+                autoFocus
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                Password
-              </label>
-              <input
-                id="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                placeholder="••••••••"
-                aria-label="Password"
-              />
+              <label className="form-label text-white/80">Password</label>
+              <div className="relative">
+                <input
+                  className="form-input bg-white/10 border-white/20 text-white placeholder-white/30 focus:border-white/60 pr-10"
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Your password"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white"
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
             </div>
+
+            {error && (
+              <div className="p-3 rounded-xl bg-danger/20 border border-danger/30 text-sm text-white">
+                {error}
+              </div>
+            )}
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2.5 px-4 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
-              aria-label="Sign in"
+              className="btn bg-white text-primary font-semibold hover:bg-white/90 w-full justify-center mt-2"
             >
-              {loading ? 'Signing in…' : 'Sign in'}
+              {loading ? 'Signing in…' : 'Sign In'}
             </button>
           </form>
         </div>
+      </div>
+
+      <div className="relative z-10 w-full">
+        <Footer light />
       </div>
     </div>
   )
