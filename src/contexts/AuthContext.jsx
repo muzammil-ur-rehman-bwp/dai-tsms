@@ -115,7 +115,19 @@ export function AuthProvider({ children }) {
     return updatedProfile
   }
 
-  const value = { user, profile, loading, signIn, signOut, refreshProfile, completePasswordChange }
+  const value = {
+    session: user ? { user } : null,
+    user,
+    profile,
+    role: profile?.role,
+    firstLoginPending: profile?.first_login_pending,
+    isActive: profile?.is_active,
+    loading,
+    signIn,
+    signOut,
+    refreshProfile,
+    completePasswordChange,
+  }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
