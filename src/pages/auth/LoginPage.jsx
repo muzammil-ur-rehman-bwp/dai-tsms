@@ -45,14 +45,14 @@ export default function LoginPage() {
       return
     }
 
-    // Check is_active for teacher/student
+    // Check is_active for teacher/student (admin users don't need this check)
     if (profile.role === 'teacher') {
       const { data: teacher } = await supabase
         .from('teachers')
         .select('is_active')
         .eq('auth_user_id', authUser.id)
         .single()
-      if (!teacher?.is_active) {
+      if (teacher && !teacher.is_active) {
         await supabase.auth.signOut()
         setLoading(false)
         setError('Your account has been deactivated. Please contact the administrator.')
@@ -64,7 +64,7 @@ export default function LoginPage() {
         .select('is_active')
         .eq('auth_user_id', authUser.id)
         .single()
-      if (!student?.is_active) {
+      if (student && !student.is_active) {
         await supabase.auth.signOut()
         setLoading(false)
         setError('Your account has been deactivated. Please contact the administrator.')
