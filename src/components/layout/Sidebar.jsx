@@ -10,19 +10,20 @@ export function Sidebar() {
   const isActive = (path) => location.pathname === path
 
   const adminLinks = [
-    { label: 'Dashboard', path: '/admin/dashboard' },
-    { label: 'Users', path: '/admin/users' },
-    { label: 'Settings', path: '/admin/settings' },
+    { label: 'Dashboard', path: '/admin' },
+    { label: 'Data Management', path: '/admin/data' },
+    { label: 'Timetables', path: '/admin/timetables' },
+    { label: 'Swap Requests', path: '/admin/swaps' },
   ]
 
   const teacherLinks = [
-    { label: 'Dashboard', path: '/teacher/dashboard' },
-    { label: 'Students', path: '/teacher/students' },
+    { label: 'Dashboard', path: '/teacher' },
+    { label: 'Timetable', path: '/teacher/timetable' },
   ]
 
   const studentLinks = [
-    { label: 'Dashboard', path: '/student/dashboard' },
-    { label: 'Exams', path: '/student/exams' },
+    { label: 'Dashboard', path: '/student' },
+    { label: 'Timetable', path: '/student/timetable' },
   ]
 
   const links = profile?.role === 'admin' ? adminLinks : profile?.role === 'teacher' ? teacherLinks : studentLinks
@@ -63,19 +64,20 @@ export function MobileNav() {
   const isActive = (path) => location.pathname === path
 
   const adminLinks = [
-    { label: 'Dashboard', path: '/admin/dashboard' },
-    { label: 'Users', path: '/admin/users' },
-    { label: 'Settings', path: '/admin/settings' },
+    { label: 'Dashboard', path: '/admin' },
+    { label: 'Data Management', path: '/admin/data' },
+    { label: 'Timetables', path: '/admin/timetables' },
+    { label: 'Swap Requests', path: '/admin/swaps' },
   ]
 
   const teacherLinks = [
-    { label: 'Dashboard', path: '/teacher/dashboard' },
-    { label: 'Students', path: '/teacher/students' },
+    { label: 'Dashboard', path: '/teacher' },
+    { label: 'Timetable', path: '/teacher/timetable' },
   ]
 
   const studentLinks = [
-    { label: 'Dashboard', path: '/student/dashboard' },
-    { label: 'Exams', path: '/student/exams' },
+    { label: 'Dashboard', path: '/student' },
+    { label: 'Timetable', path: '/student/timetable' },
   ]
 
   const links = profile?.role === 'admin' ? adminLinks : profile?.role === 'teacher' ? teacherLinks : studentLinks
