@@ -45,13 +45,19 @@ export default function LoginPage() {
       return
     }
 
-    // Check is_active for teacher/student (admin users don't need this check)
+    // Check is_active status from role-specific tables (teacher/student)
     if (profile.role === 'teacher') {
-      const { data: teacher } = await supabase
+      const { data: teacher, error: teacherError } = await supabase
         .from('teachers')
         .select('is_active')
         .eq('auth_user_id', authUser.id)
         .single()
+      
+      if (teacherError && teacherError.code !== 'PGRST116') {
+        // PGRST116 = no rows found, which is ok for admin
+        console.error('Teacher lookup error:', teacherError)
+      }
+      
       if (teacher && !teacher.is_active) {
         await supabase.auth.signOut()
         setLoading(false)
@@ -59,11 +65,16 @@ export default function LoginPage() {
         return
       }
     } else if (profile.role === 'student') {
-      const { data: student } = await supabase
+      const { data: student, error: studentError } = await supabase
         .from('students')
         .select('is_active')
         .eq('auth_user_id', authUser.id)
         .single()
+      
+      if (studentError && studentError.code !== 'PGRST116') {
+        console.error('Student lookup error:', studentError)
+      }
+      
       if (student && !student.is_active) {
         await supabase.auth.signOut()
         setLoading(false)
