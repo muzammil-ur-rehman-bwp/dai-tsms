@@ -20,7 +20,7 @@ export function AuthProvider({ children }) {
     try {
       // Wrap profile fetch in Promise.race with 5s timeout
       const profilePromise = supabase
-        .from('user_profiles')
+        .from('profiles')
         .select('*')
         .eq('id', authUser.id)
         .single()
@@ -79,7 +79,7 @@ export function AuthProvider({ children }) {
   async function refreshProfile() {
     if (!user) return
     const { data } = await supabase
-      .from('user_profiles')
+      .from('profiles')
       .select('*')
       .eq('id', user.id)
       .single()
@@ -96,14 +96,14 @@ export function AuthProvider({ children }) {
 
     // Step 3 — update DB flag (plain update, no .select() to avoid RLS PGRST116)
     const { error: dbErr } = await supabase
-      .from('user_profiles')
-      .update({ must_change_password: false, updated_at: new Date().toISOString() })
+      .from('profiles')
+      .update({ first_login_pending: false, updated_at: new Date().toISOString() })
       .eq('id', currentUser.id)
     if (dbErr) throw dbErr
 
     // Step 4 — fetch the fresh profile in a separate SELECT (RLS allows own row read)
     const { data: updatedProfile, error: fetchErr } = await supabase
-      .from('user_profiles')
+      .from('profiles')
       .select('*')
       .eq('id', currentUser.id)
       .single()
